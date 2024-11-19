@@ -1,10 +1,14 @@
 import discord
+
 import os
+from dotenv import load_dotenv
 
 import discord
+from discord.ext import commands
 
-discord_bot_token = os.enciron.get('bot token here')
-channel_id = '1308415682895151134'
+load_dotenv()
+discord_bot_token = "bot token"
+channel_id = '1308389878630711309'
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -23,7 +27,7 @@ async def on_message(self, message):
         print(f'Message from {message.author}: {message.content}')
 
 
-intents = discord.lntents.default()
+intents = discord.Intents.default()
 intents.message_content = True
 
 client = MyClient(intents=intents)
