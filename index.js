@@ -21,4 +21,4 @@ client.on('messageCreate', message => {
 });
 
 // 봇을 로그인합니다.
-client.login(token); // 우리 토큰 어디감 ?
+client.login(token);
