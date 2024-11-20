@@ -35,8 +35,8 @@ class MyModal(ui.Modal, title = "경고 시스템"):
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  
 
         embed = discord.Embed(
-             title="🚨 경고 시스템 🚨",
-            description="아래는 입력된 경고 정보입니다.",
+            title="🚨 경고자가 생겼어요!",
+            description="아래의 경고자 분은 자신의 경고를 확인하시고 꼭 이의가 생긴다면 문의해주세요!",
             color=discord.Color.red()
         )
         embed.add_field(name="경고 대상자", value=self.name.value, inline=False)
