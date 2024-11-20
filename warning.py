@@ -10,20 +10,46 @@ from datetime import datetime
 
 bot = commands.Bot(command_prefix='|',intents=discord.Intents.all())
 
+NOTIFICATION_CHANNEL_ID = 1308743159768940544
+AUTHORIZED_USERS = [1175816769529716837, 738298583895375974]
+
 @bot.event
 async def on_ready():
     print(f"{bot.user}가 실행되었습니다.")
     try:
         synced = await bot.tree.sync()
         print(f"슬래시 명령어 {len(synced)}개 동기화 완료")
+
+        channel = bot.get_channel(1308743159768940544)
+        if channel:
+            await channel.send("✅ 봇이 성공적으로 리부팅되었습니다!")
+        else:
+            print("알림 채널을 찾을 수 없습니다.")
     except Exception as e:
         print(f"슬래시 명령어 동기화 오류: {e}")
 
 @bot.tree.command(name="restart")
 async def restart(interaction: discord.Interaction):
-        await interaction.response.send_message("봇이 리부팅됩니다...")
-        await asyncio.sleep(2)
-        os.execv(sys.executable, ['python'] + sys.argv)
+        if interaction.user.id in AUTHORIZED_USERS:
+
+            await interaction.response.send_message("리부팅을 시작합니다. 봇이 곧 다시 온라인 상태가 됩니다!")
+
+        channel = bot.get_channel(738298583895375974)
+
+        if channel:
+            log_message = (
+                f"⚠️ **리부팅 명령 실행**\n"
+                f"- 실행자: {interaction.user.mention}\n"
+                f"- 실행자 ID: `{interaction.user.id}`\n"
+                f"- 실행 시간: `{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`"
+                f"- 상태: 리부팅을 시작합니다..."
+            )
+
+            await channel.send(log_message)
+            await bot.close()
+            os.execv(sys.executable, ['python'] + sys.argv)
+        else:
+            await interaction.response.send_message("이 명령어를 사용할 권한이 없습니다.", ephemeral=True)
 
 class MyModal(ui.Modal, title = "경고 시스템"):
     name = ui.TextInput(label="경고 대상자", placeholder="경고 대상자", style=discord.TextStyle.short)
@@ -51,27 +77,5 @@ class MyModal(ui.Modal, title = "경고 시스템"):
 async def warning(interaction: discord.Interaction):
     modal = MyModal()
     await interaction.response.send_modal(modal)
-
-
-class SelectMenu(discord.ui.Select):
-    def __init__(self):
-        options = [discord.SelectOption(label="test1",description="test1 설명",emoji="📊"),
-                discord.SelectOption(label="test2",description="test2 설명",emoji="📉"),
-                discord.SelectOption(label="test3",description="test3 설명",emoji="📈"),]
-        super().__init__(placeholder = "Select 메뉴 창 입니다.", options = options, min_values=1, max_values=3)
-
-    async def callback(self, interaction: discord.Interaction):
-        await interaction.response.send_message(content=f"{self.values}")
-
-class Select(discord.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(SelectMenu())
-
-@bot.tree.command(name="select")
-async def select(interaction: discord.Interaction):
-    await interaction.response.send_message(content="여기는 1번content", view=Select())
-
-
 
 bot.run('봇 토큰')
