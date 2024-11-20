@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 load_dotenv()
-discord_bot_token = "bot token"
+discord_bot_token = "token here"
 channel_id = '1308389878630711309'
 
 class MyClient(discord.Client):
