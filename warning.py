@@ -78,4 +78,56 @@ async def warning(interaction: discord.Interaction):
     modal = MyModal()
     await interaction.response.send_modal(modal)
 
+@bot.tree.command(name="문의")
+async def inquiry(interaction: discord.Interaction):
+
+    class InquiryModal(ui.Modal, title="문의 내용"):
+        question = ui.TextInput(label="문의 내용", placeholder="문의 내용을 입력해주세요", style=discord.TextStyle.long)
+
+        async def on_submit(self, interaction: discord.Interaction):
+           inquiry_content = self.question.value
+           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+           channel = bot.get_channel(1308786597986045962)
+           
+           if channel:
+               embed = discord.Embed(
+                   title="📩 새 문의가 도착했습니다!",
+                   description="사용자가 새로운 문의를 남겼습니다. 아래 내용을 확인해주세요.",
+                   color=discord.Color.blue()
+               )
+               embed.add_field(name="문의 내용", value=inquiry_content, inline=False)
+               embed.add_field(name="문의자", value=interaction.user.mention, inline=True)
+               embed.add_field(name="문의 시간", value=current_time, inline=True)
+
+               await channel.send(embed=embed)
+               await interaction.response.send_message("문의가 성공적으로 전송되었습니다. 관리자가 곧 답변할 것입니다!", ephemeral=True)
+            else:
+               await interaction.response.send_message("문의 전송 중 오류가 발생했습니다.", ephemeral=True)
+
+class ReportSelectMenu(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label="경고 시스템", description="경고 대상자를 등록", emoji="⚠️"),
+            discord.SelectOption(label="문의 내용", description="관리자에게 문의", emoji="📩")
+        ]
+        super().__init__(placeholder="신고/문의 유형을 선택하세요.", options=options, min_values=1, max_values=1)
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.values[0] == "경고 시스템":
+            modal = MyModal()
+            await interaction.response.send_modal(modal)
+        elif self.values[0] == "문의 내용":
+            modal = InquiryModal()
+            await interaction.response.send_modal(modal)
+
+class ReportView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(ReportSelectMenu())
+
+@bot.tree.command(name="report")
+async def report(interaction: discord.Interaction):
+    await interaction.response.send_message("경고 또는 문의를 선택해주세요.", view=ReportView())
+
 bot.run('봇 토큰')
