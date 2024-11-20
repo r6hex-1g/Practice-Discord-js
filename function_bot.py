@@ -5,44 +5,52 @@ from discord import ui
 from discord.interactions import Interaction
 import os
 import sys
-import time
+import asyncio
+from datetime import datetime
 
 bot = commands.Bot(command_prefix='|',intents=discord.Intents.all())
 
 @bot.event
 async def on_ready():
-    print("봇 실행")
-    synced = await bot.tree.sync()
-    print(f"Slash Command {len(synced)}")
+    print(f"{bot.user}가 실행되었습니다.")
+    try:
+        synced = await bot.tree.sync()
+        print(f"슬래시 명령어 {len(synced)}개 동기화 완료")
+    except Exception as e:
+        print(f"슬래시 명령어 동기화 오류: {e}")
 
 @bot.tree.command(name="restart")
 async def restart(interaction: discord.Interaction):
         await interaction.response.send_message("봇이 리부팅됩니다...")
-
-        time.sleep(2)
-
+        await asyncio.sleep(2)
         os.execv(sys.executable, ['python'] + sys.argv)
 
-class MyModal(ui.Modal, title = "test 제목 필드 입니다."):
+class MyModal(ui.Modal, title = "경고 시스템"):
     name = ui.TextInput(label="경고 대상자", placeholder="경고 대상자", style=discord.TextStyle.short)
     name2 = ui.TextInput(label="경고 횟수", placeholder="경고 횟수", style=discord.TextStyle.long)
     name3 = ui.TextInput(label="경고 사유", placeholder="경고 사유", style=discord.TextStyle.short)
     name4 = ui.TextInput(label="경고 집행자", placeholder="경고 집행자", style=discord.TextStyle.short)
 
-
     async def on_submit(self, interaction: discord.Interaction):
-        message = (
-            f"경고 대상자: {self.name}\n"
-            f"경고 횟수: {self.name2}\n"
-            f"경고 사유: {self.name3}\n"
-            f"경고 집행자: {self.name4}"
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  
+
+        embed = discord.Embed(
+             title="🚨 경고 시스템 🚨",
+            description="아래는 입력된 경고 정보입니다.",
+            color=discord.Color.red()
         )
-        await interaction.response.send_message(message)
+        embed.add_field(name="경고 대상자", value=self.name.value, inline=False)
+        embed.add_field(name="경고 횟수", value=self.name2.value, inline=True)
+        embed.add_field(name="경고 사유", value=self.name3.value, inline=False)
+        embed.add_field(name="경고 집행자", value=self.name4.value, inline=True)
+        embed.set_footer(text=f"경고 발행 시간: {current_time}")
+
+        await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="warning")
 async def warning(interaction: discord.Interaction):
-    message = "이것은 경고 메시지입니다."
-    await interaction.response.send_message(message)
+    modal = MyModal()
+    await interaction.response.send_modal(modal)
 
 
 class SelectMenu(discord.ui.Select):
@@ -66,4 +74,4 @@ async def select(interaction: discord.Interaction):
 
 
 
-bot.run('봇토큰')
+bot.run('봇 토큰')
