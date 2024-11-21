@@ -90,20 +90,21 @@ async def inquiry(interaction: discord.Interaction):
 
            channel = bot.get_channel(1308786597986045962)
            
-           if channel:
-               embed = discord.Embed(
-                   title="📩 새 문의가 도착했습니다!",
-                   description="사용자가 새로운 문의를 남겼습니다. 아래 내용을 확인해주세요.",
-                   color=discord.Color.blue()
-               )
-               embed.add_field(name="문의 내용", value=inquiry_content, inline=False)
-               embed.add_field(name="문의자", value=interaction.user.mention, inline=True)
-               embed.add_field(name="문의 시간", value=current_time, inline=True)
+        if channel:
+            embed = discord.Embed(
+                title="📩 새 문의가 도착했습니다!",
+                description="사용자가 새로운 문의를 남겼습니다. 아래 내용을 확인해주세요.",
+                color=discord.Color.blue()
+        )
+            embed.add_field(name="문의 내용", value=inquiry_content, inline=False)
+            embed.add_field(name="문의자", value=interaction.user.mention, inline=True)
+            embed.add_field(name="문의 시간", value=current_time, inline=True)
 
-               await channel.send(embed=embed)
-               await interaction.response.send_message("문의가 성공적으로 전송되었습니다. 관리자가 곧 답변할 것입니다!", ephemeral=True)
-            else:
-               await interaction.response.send_message("문의 전송 중 오류가 발생했습니다.", ephemeral=True)
+            await channel.send(embed=embed)
+            await interaction.response.send_message("문의가 성공적으로 전송되었습니다. 관리자가 곧 답변할 것입니다!", ephemeral=True)
+            
+        else:
+            await interaction.response.send_message("문의 전송 중 오류가 발생했습니다.", ephemeral=True)
 
 class ReportSelectMenu(discord.ui.Select):
     def __init__(self):
