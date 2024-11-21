@@ -83,12 +83,12 @@ async def warning(interaction: discord.Interaction):
     modal = MyModal()
     await interaction.response.send_modal(modal)
 
-class InquiryModal(ui.Modal, title="문의 내용"):
-    @bot.tree.command(name="문의")
-    async def inquiry(interaction: discord.Interaction):
-        modal = InquiryModal()
-        await interaction.response.send_modal(modal)
+@bot.tree.command(name="inquiry")
+async def inquiry(interaction: discord.Interaction):
+    modal = InquiryModal()
+    await interaction.response.send_modal(modal)
         
+class InquiryModal(ui.Modal, title="문의 내용"):
     question = ui.TextInput(label="문의 내용", placeholder="문의 내용을 입력해주세요", style=discord.TextStyle.long)
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -114,7 +114,7 @@ class InquiryModal(ui.Modal, title="문의 내용"):
             await interaction.response.send_message("문의 전송 중 오류가 발생했습니다.", ephemeral=True)
 
 class ReportSelectMenu(discord.ui.Select):
-    def __init__(self):
+    async def __init__(self):
         options = [
             discord.SelectOption(label="경고 시스템", description="경고 대상자를 등록", emoji="⚠️"),
             discord.SelectOption(label="문의 내용", description="관리자에게 문의", emoji="📩")
@@ -130,7 +130,7 @@ class ReportSelectMenu(discord.ui.Select):
             await interaction.response.send_modal(modal)
 
 class ReportView(discord.ui.View):
-    def __init__(self):
+    async def __init__(self):
         super().__init__()
         self.add_item(ReportSelectMenu())
 
