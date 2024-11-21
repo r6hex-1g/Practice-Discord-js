@@ -17,8 +17,8 @@ AUTHORIZED_USERS = [1175816769529716837, 738298583895375974]
 async def on_ready():
     print(f"{bot.user}가 실행되었습니다.")
     try:
-        synced = await bot.tree.sync()
-        print(f"슬래시 명령어 {len(synced)}개 동기화 완료")
+        # synced = await bot.tree.sync()
+        # print(f"슬래시 명령어 {len(synced)}개 동기화 완료")
 
         channel = bot.get_channel(1308743159768940544)
         if channel:
@@ -28,12 +28,16 @@ async def on_ready():
     except Exception as e:
         print(f"슬래시 명령어 동기화 오류: {e}")
 
+@bot.tree.command(name="sync")
+@commands.is_owner()
+async def sync(interaction: discord.Interaction):
+    synced = await bot.tree.sync()
+    await interaction.response.send_message(f"슬래시 명령어 {len(synced)}개 동기화 완료!")
+
 @bot.tree.command(name="restart")
 async def restart(interaction: discord.Interaction):
         if interaction.user.id in AUTHORIZED_USERS:
-
             await interaction.response.send_message("리부팅을 시작합니다. 봇이 곧 다시 온라인 상태가 됩니다!")
-
         channel = bot.get_channel(738298583895375974)
 
         if channel:
@@ -48,8 +52,9 @@ async def restart(interaction: discord.Interaction):
             await channel.send(log_message)
             await bot.close()
             os.execv(sys.executable, ['python'] + sys.argv)
-        else:
-            await interaction.response.send_message("이 명령어를 사용할 권한이 없습니다.", ephemeral=True)
+        
+        # else:
+        #     await interaction.response.send_message("이 명령어를 사용할 권한이 없습니다.", ephemeral=True)
 
 class MyModal(ui.Modal, title = "경고 시스템"):
     name = ui.TextInput(label="경고 대상자", placeholder="경고 대상자", style=discord.TextStyle.short)
@@ -78,24 +83,26 @@ async def warning(interaction: discord.Interaction):
     modal = MyModal()
     await interaction.response.send_modal(modal)
 
-@bot.tree.command(name="문의")
-async def inquiry(interaction: discord.Interaction):
+class InquiryModal(ui.Modal, title="문의 내용"):
+    @bot.tree.command(name="문의")
+    async def inquiry(interaction: discord.Interaction):
+        modal = InquiryModal()
+        await interaction.response.send_modal(modal)
+        
+    question = ui.TextInput(label="문의 내용", placeholder="문의 내용을 입력해주세요", style=discord.TextStyle.long)
 
-    class InquiryModal(ui.Modal, title="문의 내용"):
-        question = ui.TextInput(label="문의 내용", placeholder="문의 내용을 입력해주세요", style=discord.TextStyle.long)
+    async def on_submit(self, interaction: discord.Interaction):
+        inquiry_content = self.question.value
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        async def on_submit(self, interaction: discord.Interaction):
-           inquiry_content = self.question.value
-           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-           channel = bot.get_channel(1308786597986045962)
+        channel = bot.get_channel(1308786597986045962)
            
         if channel:
             embed = discord.Embed(
                 title="📩 새 문의가 도착했습니다!",
                 description="사용자가 새로운 문의를 남겼습니다. 아래 내용을 확인해주세요.",
                 color=discord.Color.blue()
-        )
+            )
             embed.add_field(name="문의 내용", value=inquiry_content, inline=False)
             embed.add_field(name="문의자", value=interaction.user.mention, inline=True)
             embed.add_field(name="문의 시간", value=current_time, inline=True)
@@ -130,5 +137,12 @@ class ReportView(discord.ui.View):
 @bot.tree.command(name="report")
 async def report(interaction: discord.Interaction):
     await interaction.response.send_message("경고 또는 문의를 선택해주세요.", view=ReportView())
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("이 명령어를 사용할 권한이 없습니다.", delete_after=10)
+    else:
+        await ctx.send(f"알 수 없는 오류가 발생했습니다: {error}", delete_after=10)
 
 bot.run('봇 토큰')
