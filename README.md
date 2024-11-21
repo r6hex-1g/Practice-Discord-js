@@ -4,7 +4,7 @@
   물론 멘토도 있으니까 뭔가 가능하지 않을까요 ?
   <br>
   <br>
-  📆 : 아직 시작하지 않음
+  📆 : 2024.11.19. ~ <b>Keep Going</b>
   <br>
   <br>
   🖥️ : Not version releases yet.
