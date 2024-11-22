@@ -17,8 +17,8 @@ AUTHORIZED_USERS = [1175816769529716837, 738298583895375974]
 async def on_ready():
     print(f"{bot.user}가 실행되었습니다.")
     try:
-        # synced = await bot.tree.sync()
-        # print(f"슬래시 명령어 {len(synced)}개 동기화 완료")
+        await bot.tree.sync()
+        print("슬래시 명령어 동기화 완료.")
 
         channel = bot.get_channel(1308743159768940544)
         if channel:
@@ -26,13 +26,16 @@ async def on_ready():
         else:
             print("알림 채널을 찾을 수 없습니다.")
     except Exception as e:
-        print(f"슬래시 명령어 동기화 오류: {e}")
+            print(f"슬래시 명령어 동기화 중 오류 발생: {e}")
 
 @bot.tree.command(name="sync")
 @commands.is_owner()
-async def sync(interaction: discord.Interaction):
-    synced = await bot.tree.sync()
-    await interaction.response.send_message(f"슬래시 명령어 {len(synced)}개 동기화 완료!")
+async def sync(interaction: discord.Integration):
+    try:
+        await bot.tree.sync()
+        await interaction.response.send_message("슬래시 명령어 동기화 완료!")
+    except Exception as e:
+        print(f"슬래시 명령어 동기화 오류: {e}")
 
 @bot.tree.command(name="restart")
 async def restart(interaction: discord.Interaction):
@@ -52,9 +55,6 @@ async def restart(interaction: discord.Interaction):
             await channel.send(log_message)
             await bot.close()
             os.execv(sys.executable, ['python'] + sys.argv)
-        
-        # else:
-        #     await interaction.response.send_message("이 명령어를 사용할 권한이 없습니다.", ephemeral=True)
 
 class MyModal(ui.Modal, title = "경고 시스템"):
     name = ui.TextInput(label="경고 대상자", placeholder="경고 대상자", style=discord.TextStyle.short)
@@ -114,7 +114,7 @@ class InquiryModal(ui.Modal, title="문의 내용"):
             await interaction.response.send_message("문의 전송 중 오류가 발생했습니다.", ephemeral=True)
 
 class ReportSelectMenu(discord.ui.Select):
-    async def __init__(self):
+    def __init__(self):
         options = [
             discord.SelectOption(label="경고 시스템", description="경고 대상자를 등록", emoji="⚠️"),
             discord.SelectOption(label="문의 내용", description="관리자에게 문의", emoji="📩")
@@ -130,7 +130,7 @@ class ReportSelectMenu(discord.ui.Select):
             await interaction.response.send_modal(modal)
 
 class ReportView(discord.ui.View):
-    async def __init__(self):
+    def __init__(self):
         super().__init__()
         self.add_item(ReportSelectMenu())
 
